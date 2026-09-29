@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Environment Variables
+.env
+.env.*
+
+# Build Outputs
+dist/
+build/
+
+# Server Data / Uploads
+server/uploads/
+server/audio/
+
+# OS and Editor
+.DS_Store
+.vscode/
+.idea/
