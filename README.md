@@ -16,6 +16,51 @@ This application dynamically creates course outlines, detailed lessons, interact
 - **Progress Tracking**: Track your completion and quiz scores across courses, modules, and lessons.
 - **Secure Authentication**: User authentication and session management powered by Auth0.
 
+---
+
+## 🏗️ Project Architecture & Folder Structure
+
+This project follows a decoupled **Client-Server architecture** (Frontend in React, Backend in Node.js/Express) and uses a **Service-Oriented Architecture** on the backend to separate business logic from routing.
+
+```text
+AI-Powered-Course-Generator/
+├── client/                     # Frontend React (Vite) Application
+│   ├── public/                 # Static assets (icons, favicons)
+│   ├── src/                    
+│   │   ├── assets/             # Images and local UI assets
+│   │   ├── components/         # Reusable UI components (Sidebar, LessonRenderer, etc.)
+│   │   ├── pages/              # Main view containers (Home, Course, Lesson)
+│   │   ├── utils/              # Helper functions (api.js for Axios config)
+│   │   ├── App.jsx             # Main React component and Route definitions
+│   │   ├── index.css           # Global CSS variables and resets
+│   │   └── main.jsx            # React entry point and Context Providers
+│   ├── vite.config.js          # Vite bundler configuration
+│   └── package.json            # Frontend dependencies
+│
+├── server/                     # Backend Node.js/Express Application
+│   ├── config/                 # Application configuration (db.js, env.js)
+│   ├── controllers/            # Request handlers (processes req/res)
+│   ├── middleware/             # Express middlewares (Auth, Error handling)
+│   ├── models/                 # Mongoose schemas (User, Course, Module, Lesson, Progress)
+│   ├── routes/                 # API route definitions (maps endpoints to controllers)
+│   ├── services/               # Core business logic & API integrations
+│   │   ├── audio.service.js             # Gemini Text-To-Speech integration
+│   │   ├── courseGeneration.service.js  # Main logic for structuring AI courses
+│   │   ├── gemini.service.js            # Base Google GenAI setup and fallback configs
+│   │   ├── translation.service.js       # Hinglish translation prompt logic
+│   │   └── youtube.service.js           # YouTube Data API video searching & caching
+│   ├── utils/                  # Backend utilities (asyncHandler, AppError)
+│   ├── validators/             # Zod validation schemas for request bodies
+│   ├── app.js                  # Express app initialization and global middlewares
+│   ├── server.js               # Backend entry point (starts HTTP server)
+│   └── package.json            # Backend dependencies
+│
+├── .gitignore                  # Git ignore rules
+└── README.md                   # Project documentation
+```
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Frontend (`/client`)
@@ -32,6 +77,8 @@ This application dynamically creates course outlines, detailed lessons, interact
 - **External APIs**: YouTube Data API v3
 - **Validation**: Zod
 - **Audio Processing**: `wav` for PCM to WAV conversions
+
+---
 
 ## 🚀 Getting Started
 
@@ -102,6 +149,8 @@ npm run dev
 
 ### 4. Open the App
 Navigate to `http://localhost:5173` in your browser.
+
+---
 
 ## 🤝 Contributing
 
