@@ -110,13 +110,10 @@ const videoBlockSchema =
       z.literal("video"),
 
     query:
-      nonEmptyText(
-        "Video search query is required."
-      )
-      .max(
-        300,
-        "Video search query cannot exceed 300 characters."
-      )
+      z.string().max(300).optional().or(z.literal("")),
+      
+    url:
+      z.string().optional()
   });
 
 
@@ -133,69 +130,17 @@ const mcqBlockSchema =
         z.literal("mcq"),
 
       text:
-        nonEmptyText(
-          "MCQ question is required."
-        ),
+        z.string().optional().or(z.literal("")),
 
       options:
-        z
-          .array(
-            z
-              .string()
-              .trim()
-              .min(
-                1,
-                "MCQ option cannot be empty."
-              )
-          )
-          .min(
-            2,
-            "MCQ must have at least 2 options."
-          )
-          .max(
-            6,
-            "MCQ cannot have more than 6 options."
-          ),
+        z.array(z.string()).optional(),
 
       answer:
-        z
-          .number({
-            error:
-              "MCQ answer must be a number."
-          })
-          .int(
-            "MCQ answer must be an integer."
-          )
-          .nonnegative(
-            "MCQ answer cannot be negative."
-          ),
+        z.union([z.number(), z.string()]).optional(),
 
       explanation:
-        nonEmptyText(
-          "MCQ explanation is required."
-        )
-    })
-    .superRefine(
-      (data, context) => {
-        if (
-          data.answer >=
-          data.options.length
-        ) {
-          context.addIssue({
-            code:
-              z.ZodIssueCode
-                .custom,
-
-            path: [
-              "answer"
-            ],
-
-            message:
-              "MCQ answer must point to a valid option index."
-          });
-        }
-      }
-    );
+        z.string().optional().or(z.literal(""))
+    });
 
 
 /*
@@ -604,7 +549,10 @@ export const updateLessonSchema =
             300,
             "Video query cannot exceed 300 characters."
           )
-          .optional()
+          .optional(),
+
+      isEnriched:
+        z.boolean().optional()
     })
     .refine(
       (data) =>

@@ -98,16 +98,17 @@ export const generateLessonAudio =
           req.user._id
         );
 
-      /*
-        TTS requires Hinglish text.
-      */
-      if (
-        !lesson.hinglishText ||
-        lesson.hinglishText.trim()
-          .length === 0
-      ) {
+      let textToRead = lesson.hinglishText;
+      if (!textToRead || textToRead.trim().length === 0) {
+        textToRead = lesson.title + "\n\n" + lesson.content
+          .filter(b => b.type === 'paragraph' || b.type === 'heading')
+          .map(b => b.text)
+          .join('\n\n');
+      }
+
+      if (!textToRead || textToRead.trim().length === 0) {
         throw new AppError(
-          "Hinglish translation is required before generating audio.",
+          "No text available to generate audio.",
           400
         );
       }
@@ -120,7 +121,7 @@ export const generateLessonAudio =
           lessonId:
             lesson._id.toString(),
           text:
-            lesson.hinglishText
+            textToRead
         });
 
       /*

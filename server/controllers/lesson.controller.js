@@ -276,7 +276,10 @@ export const updateLesson =
         "objectives",
         "keyTopics",
         "content",
-        "videoQuery"
+        "videoQuery",
+        "readings",
+        "externalLinks",
+        "isEnriched"
       ];
 
       const updates = {};
@@ -288,8 +291,17 @@ export const updateLesson =
           req.body[field] !==
           undefined
         ) {
-          updates[field] =
-            req.body[field];
+          if (field === "content" && Array.isArray(req.body.content)) {
+            updates.content = req.body.content.filter(block => {
+              if (block.type === "mcq") {
+                if (!block.options || !Array.isArray(block.options) || block.options.length < 2) return false;
+                if (block.answer === undefined || block.answer === null) return false;
+              }
+              return true;
+            });
+          } else {
+            updates[field] = req.body[field];
+          }
         }
       }
 

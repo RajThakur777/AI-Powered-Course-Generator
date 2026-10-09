@@ -239,6 +239,10 @@ const lessonSchema = {
             type: "string"
           },
 
+          question: {
+            type: "string"
+          },
+
           language: {
             type: "string"
           },
@@ -253,7 +257,6 @@ const lessonSchema = {
 
           options: {
             type: "array",
-
             items: {
               type: "string"
             }
@@ -617,17 +620,18 @@ LESSON REQUIREMENTS:
 9. Generate one useful video search query
    in videoQuery.
 
-10. Include 4-5 MCQs near the end
-    of the lesson.
+10. YOU MUST generate EXACTLY 4 multiple-choice
+    questions (MCQs) as blocks inside the 'content' array
+    at the very end of the lesson. DO NOT SKIP THIS STEP.
 
 11. Every MCQ must contain:
     - type = "mcq"
-    - text
-    - options
-    - answer
+    - question (the question text)
+    - options (an array of EXACTLY 4 possible answers)
+    - answer (the index of the correct option, 0-3)
     - explanation
 
-12. The answer field is a zero-based index.
+12. The options array MUST be populated with exactly 4 strings. True/False questions must also be formatted with options ["True", "False"].
 
 13. Generate useful suggested readings.
 

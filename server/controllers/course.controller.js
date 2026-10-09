@@ -72,6 +72,28 @@ export const getCourses = asyncHandler(
   }
 );
 
+/*
+  GET /api/courses/explore/all
+
+  Get all courses for the explore page.
+*/
+export const getAllCourses = asyncHandler(
+  async (req, res) => {
+    const courses =
+      await Course.find()
+        .sort({
+          createdAt: -1
+        })
+        .populate('creator', 'name email'); // Optional: populate creator info if needed
+
+    res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses
+    });
+  }
+);
+
 
 /*
   GET /api/courses/:courseId
@@ -98,9 +120,9 @@ export const getCourseById =
 
       const course =
         await Course.findOne({
-          _id: courseId,
-          creator: req.user._id
+          _id: courseId
         })
+          .populate('creator', 'auth0Id')
           .populate({
             path: "modules",
             options: {

@@ -180,7 +180,7 @@ export const generateLessonAudioFile =
       */
       const response =
         await ai.models.generateContent({
-          model: "gemini-3.1-flash-tts-preview",
+          model: env.geminiFallbackModel || "gemini-2.0-flash",
 
           contents:
             trimmedText,
@@ -196,10 +196,7 @@ export const generateLessonAudioFile =
                   voiceName:
                     "Kore"
                 }
-              },
-
-              languageCode:
-                "hi-IN"
+              }
             }
           }
         });

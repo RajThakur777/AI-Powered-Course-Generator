@@ -8,7 +8,20 @@ import './index.css';
 
 const theme = extendTheme({
   config: { initialColorMode: 'dark', useSystemColorMode: false },
-  colors: { brand: { 400: '#9b4dca', 500: '#8A2BE2' } }
+  colors: { 
+    brand: { 
+      50: '#f5e8ff',
+      100: '#e3c2ff',
+      200: '#c68dff',
+      300: '#a651ff',
+      400: '#9b4dca',
+      500: '#8A2BE2',
+      600: '#751dc3',
+      700: '#5a139a',
+      800: '#430d76',
+      900: '#2c0650',
+    } 
+  }
 });
 
 ReactDOM.createRoot(document.getElementById('root')).render(

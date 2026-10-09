@@ -49,7 +49,15 @@ export default function Lesson() {
             moduleId: currentModule._id,
             lessonTitle: currentLessonRef.title
           }, { headers: { Authorization: `Bearer ${token}` } });
-          setLesson(generateRes.data.data);
+          
+          const generatedLessonData = generateRes.data.data;
+          
+          const updateRes = await api.put(`/lessons/${currentLessonRef._id}`, {
+            ...generatedLessonData,
+            isEnriched: true
+          }, { headers: { Authorization: `Bearer ${token}` } });
+          
+          setLesson(updateRes.data.data);
         }
       } catch (error) {
          console.error(error);
@@ -111,41 +119,79 @@ export default function Lesson() {
   if (!lesson) return <Box>Lesson not found.</Box>;
 
   return (
-    <Box maxW="4xl" mx="auto">
-      <HStack mb={6} justify="space-between" flexWrap="wrap" gap={4}>
-        <Button variant="ghost" leftIcon={<ArrowLeft />} onClick={() => navigate(`/courses/${courseId}`)}>
+    <Box maxW="5xl" mx="auto" py={6}>
+      <HStack mb={8} justify="space-between" flexWrap="wrap" gap={4} p={4} bg="whiteAlpha.50" borderRadius="xl" border="1px solid" borderColor="whiteAlpha.100" backdropFilter="blur(10px)">
+        <Button 
+          variant="ghost" 
+          leftIcon={<ArrowLeft />} 
+          onClick={() => navigate(`/dashboard/courses/${courseId}`)}
+          _hover={{ bg: 'whiteAlpha.200', transform: 'translateX(-4px)' }}
+          transition="all 0.2s"
+          color="gray.300"
+        >
           Back to Course
         </Button>
         <HStack>
-           <Button colorScheme="blue" leftIcon={<Languages />} onClick={handleTranslate} isLoading={isTranslating} isDisabled={!!lesson.hinglishText}>
+           <Button 
+             bgGradient={lesson.hinglishText ? "linear(to-r, gray.600, gray.700)" : "linear(to-r, blue.400, blue.600)"} 
+             color="white" 
+             leftIcon={<Languages />} 
+             onClick={handleTranslate} 
+             isLoading={isTranslating} 
+             isDisabled={!!lesson.hinglishText}
+             _hover={!lesson.hinglishText ? { transform: 'translateY(-2px)', boxShadow: '0 4px 15px rgba(66, 153, 225, 0.4)' } : {}}
+             transition="all 0.2s"
+           >
              {lesson.hinglishText ? 'Translated' : 'Translate to Hinglish'}
            </Button>
-           <Button colorScheme="purple" leftIcon={<PlayCircle />} onClick={handleGenerateAudio} isLoading={isGeneratingAudio} isDisabled={!lesson.hinglishText || !!audioUrl}>
-             Generate Audio
+           <Button 
+             bgGradient={!!audioUrl ? "linear(to-r, gray.600, gray.700)" : "linear(to-r, brand.400, pink.500)"} 
+             color="white" 
+             leftIcon={<PlayCircle />} 
+             onClick={handleGenerateAudio} 
+             isLoading={isGeneratingAudio} 
+             isDisabled={!!audioUrl}
+             _hover={!audioUrl ? { transform: 'translateY(-2px)', boxShadow: '0 4px 15px rgba(138, 43, 226, 0.4)' } : {}}
+             transition="all 0.2s"
+           >
+             {audioUrl ? 'Audio Ready' : 'Generate Audio'}
            </Button>
-           <Button colorScheme="green" leftIcon={<Download />} onClick={downloadPDF}>
+           <Button 
+             colorScheme="green" 
+             variant="outline"
+             leftIcon={<Download />} 
+             onClick={downloadPDF}
+             _hover={{ bg: 'green.500', color: 'white', transform: 'translateY(-2px)' }}
+             transition="all 0.2s"
+           >
              PDF
            </Button>
         </HStack>
       </HStack>
       
       {audioUrl && (
-        <Box mb={6} p={4} bg="gray.800" borderRadius="md" border="1px solid" borderColor="brand.500">
-           <Text mb={2} color="brand.400" fontWeight="bold">Lesson Audio (Hinglish)</Text>
-           <audio controls src={audioUrl} style={{ width: '100%' }} />
+        <Box mb={8} p={6} bgGradient="linear(to-r, gray.800, gray.900)" borderRadius="xl" border="1px solid" borderColor="brand.500" boxShadow="xl">
+           <Text mb={4} color="brand.300" fontWeight="bold" display="flex" alignItems="center" gap={2}>
+             <PlayCircle size={20} /> Listen to this lesson (Hinglish)
+           </Text>
+           <Box as="audio" controls src={audioUrl} w="100%" sx={{ '&::-webkit-media-controls-panel': { backgroundColor: '#cbd5e0' } }} />
         </Box>
       )}
 
-      <Box id="lesson-content" bg="gray.800" p={8} borderRadius="xl" boxShadow="xl" border="1px solid" borderColor="whiteAlpha.200">
-        <Heading size="2xl" mb={8} color="brand.400">{lesson.title}</Heading>
+      <Box id="lesson-content" bg="gray.900" p={10} borderRadius="2xl" boxShadow="2xl" border="1px solid" borderColor="whiteAlpha.100" position="relative" overflow="hidden">
+        <Box position="absolute" top="-10%" right="-10%" w="30%" h="50%" bgGradient="radial(brand.500, transparent, transparent)" opacity={0.1} filter="blur(60px)" pointerEvents="none" />
         
-        {lesson.hinglishText && (
-          <Box mb={8} p={4} bg="whiteAlpha.50" borderLeft="4px solid" borderColor="brand.500">
-            <Text color="gray.300" whiteSpace="pre-wrap">{lesson.hinglishText}</Text>
-          </Box>
-        )}
+        <Box position="relative" zIndex={1}>
+          <Heading size="2xl" mb={10} bgGradient="linear(to-r, brand.300, pink.300)" bgClip="text" fontWeight="extrabold" lineHeight="tall">{lesson.title}</Heading>
+          
+          {lesson.hinglishText && (
+            <Box mb={10} p={6} bg="brand.900" borderLeft="4px solid" borderColor="brand.400" borderRadius="md" boxShadow="md">
+              <Text color="gray.200" fontSize="lg" lineHeight="relaxed" whiteSpace="pre-wrap">{lesson.hinglishText}</Text>
+            </Box>
+          )}
 
-        <LessonRenderer content={lesson.content} courseId={courseId} lessonId={lesson._id} />
+          <LessonRenderer content={lesson.content} courseId={courseId} lessonId={lesson._id} />
+        </Box>
       </Box>
     </Box>
   );

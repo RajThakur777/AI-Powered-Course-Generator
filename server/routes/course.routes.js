@@ -16,6 +16,7 @@ import {
 import {
   createCourse,
   getCourses,
+  getAllCourses,
   getCourseById,
   updateCourse,
   deleteCourse
@@ -52,6 +53,16 @@ router.post(
 router.get(
   "/",
   getCourses
+);
+
+/*
+  GET /api/courses/explore/all
+
+  Get all courses from all users.
+*/
+router.get(
+  "/explore/all",
+  getAllCourses
 );
 
 /*
