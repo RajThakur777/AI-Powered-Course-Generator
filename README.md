@@ -136,7 +136,7 @@ npm install
 
 Create a `.env` file in the `client` directory for your frontend variables:
 ```env
-VITE_API_BASE_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5000
 VITE_AUTH0_DOMAIN=your_auth0_domain
 VITE_AUTH0_CLIENT_ID=your_auth0_client_id
 VITE_AUTH0_AUDIENCE=your_auth0_audience
