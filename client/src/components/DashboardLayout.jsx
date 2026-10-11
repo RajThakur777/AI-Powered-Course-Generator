@@ -7,19 +7,22 @@ import Course from '../pages/Course';
 import Lesson from '../pages/Lesson';
 import Library from '../pages/Library';
 import Explore from '../pages/Explore';
+import ErrorBoundary from './ErrorBoundary';
 
 export default function DashboardLayout() {
   return (
     <Flex h="100vh" bg="gray.900" color="white" overflow="hidden">
       <Sidebar />
       <Box flex="1" overflowY="auto" p={8}>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/courses/:courseId" element={<Course />} />
-          <Route path="/courses/:courseId/module/:moduleIndex/lesson/:lessonIndex" element={<Lesson />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/courses/:courseId" element={<Course />} />
+            <Route path="/courses/:courseId/module/:moduleIndex/lesson/:lessonIndex" element={<Lesson />} />
+          </Routes>
+        </ErrorBoundary>
       </Box>
     </Flex>
   );

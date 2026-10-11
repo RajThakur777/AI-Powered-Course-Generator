@@ -132,6 +132,9 @@ const mcqBlockSchema =
       text:
         z.string().optional().or(z.literal("")),
 
+      question:
+        z.string().optional().or(z.literal("")),
+
       options:
         z.array(z.string()).optional(),
 

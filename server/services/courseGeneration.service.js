@@ -585,15 +585,16 @@ Focus specifically on the requested lesson.
 
 LESSON REQUIREMENTS:
 
-1. Generate 3-6 clear learning objectives.
+1. Generate 3-5 clear learning objectives.
 
-2. Generate 4-8 key topics.
+2. Generate 4-6 key topics.
 
-3. Generate rich educational content
-   using structured content blocks.
+3. Generate high-quality structured content
+   using 6-10 total content blocks.
+   Keep each paragraph concise (2-4 sentences), highly informative, and impactful.
+   Do not exceed 12 blocks total so generation remains fast and reliable.
 
 4. Supported content block types:
-
    heading
    paragraph
    code
@@ -719,17 +720,86 @@ LESSON REQUIREMENTS:
     }
 
 
-    if (
-      !Array.isArray(
-        lesson.content
-      )
-    ) {
-      throw new AppError(
-        "Generated lesson content is invalid.",
-        502
-      );
-    }
+    /*
+      Normalize MCQs and ensure every lesson has a quiz.
+    */
+    const hasMcqs = lesson.content.some(b => b.type === "mcq" && Array.isArray(b.options) && b.options.length >= 2);
 
+    if (!hasMcqs) {
+      console.log(`Generating fallback quiz MCQs for lesson: ${trimmedLessonTitle}`);
+      const topic1 = lesson.keyTopics?.[0] || trimmedLessonTitle;
+      const topic2 = lesson.keyTopics?.[1] || "Core Concepts";
+      const topic3 = lesson.keyTopics?.[2] || "Best Practices";
+
+      lesson.content.push(
+        {
+          type: "mcq",
+          question: `What is the primary focus of ${trimmedLessonTitle}?`,
+          text: `What is the primary focus of ${trimmedLessonTitle}?`,
+          options: [
+            `Understanding and applying key concepts of ${topic1}`,
+            "Replacing fundamental computer architecture",
+            "Disabling network security protocols",
+            "Skipping foundational principles entirely"
+          ],
+          answer: 0,
+          explanation: `This lesson focuses on teaching core concepts, methods, and practical use of ${trimmedLessonTitle}.`
+        },
+        {
+          type: "mcq",
+          question: `Which topic is directly relevant when studying ${trimmedLessonTitle}?`,
+          text: `Which topic is directly relevant when studying ${trimmedLessonTitle}?`,
+          options: [
+            "Random unrelated syntax",
+            `${topic2}`,
+            "Outdated obsolete patterns only",
+            "None of the topics covered"
+          ],
+          answer: 1,
+          explanation: `${topic2} is one of the essential topics covered in this lesson curriculum.`
+        },
+        {
+          type: "mcq",
+          question: `How should a learner apply principles learned in ${trimmedLessonTitle}?`,
+          text: `How should a learner apply principles learned in ${trimmedLessonTitle}?`,
+          options: [
+            "By ignoring real-world application",
+            "By implementing guided examples and adhering to standards",
+            "By avoiding testing and validation",
+            "By memorizing without understanding"
+          ],
+          answer: 1,
+          explanation: "Best practices encourage implementing guided examples, testing hypotheses, and writing maintainable solutions."
+        },
+        {
+          type: "mcq",
+          question: `Why is understanding ${topic3} important for mastering ${trimmedLessonTitle}?`,
+          text: `Why is understanding ${topic3} important for mastering ${trimmedLessonTitle}?`,
+          options: [
+            "It has no practical significance",
+            "It builds the necessary conceptual foundation for advanced workflows",
+            "It replaces the need for any further learning",
+            "It is only relevant for theoretical exams"
+          ],
+          answer: 1,
+          explanation: "Mastering foundational sub-concepts establishes the critical bridge to advanced applications."
+        }
+      );
+    } else {
+      // Normalize existing MCQ blocks to ensure question and text are populated
+      lesson.content = lesson.content.map(b => {
+        if (b.type === "mcq") {
+          const qText = b.question || b.text || "Knowledge Check Question";
+          return {
+            ...b,
+            text: qText,
+            question: qText,
+            answer: typeof b.answer === "string" ? parseInt(b.answer, 10) : (b.answer ?? 0)
+          };
+        }
+        return b;
+      });
+    }
 
     return lesson;
   };

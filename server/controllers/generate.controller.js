@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import Course from "../models/Course.js";
 import Module from "../models/Module.js";
+import Lesson from "../models/Lesson.js";
 
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError from "../utils/AppError.js";
@@ -174,7 +175,7 @@ export const generateLesson = asyncHandler(
     /*
       Generate lesson content.
     */
-    const lesson =
+    const generatedData =
       await generateLessonContent({
         courseId:
           course._id.toString(),
@@ -186,11 +187,38 @@ export const generateLesson = asyncHandler(
           trimmedLessonTitle
       });
 
+    /*
+      Directly persist the generated lesson content to MongoDB.
+    */
+    let existingLesson = await Lesson.findOne({
+      module: module._id,
+      title: trimmedLessonTitle
+    });
+
+    if (!existingLesson) {
+      existingLesson = await Lesson.findOne({
+        module: module._id,
+        title: { $regex: new RegExp(`^${trimmedLessonTitle.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, "i") }
+      });
+    }
+
+    if (existingLesson) {
+      existingLesson.title = generatedData.title || trimmedLessonTitle;
+      existingLesson.objectives = generatedData.objectives || [];
+      existingLesson.keyTopics = generatedData.keyTopics || [];
+      existingLesson.content = generatedData.content || [];
+      existingLesson.readings = generatedData.readings || [];
+      existingLesson.externalLinks = generatedData.externalLinks || [];
+      existingLesson.videoQuery = generatedData.videoQuery || "";
+      existingLesson.isEnriched = true;
+      await existingLesson.save();
+    }
+
     res.status(200).json({
       success: true,
       message:
         "Lesson generated successfully.",
-      data: lesson
+      data: existingLesson ? existingLesson.toObject() : generatedData
     });
   }
 );

@@ -54,6 +54,14 @@ const contentBlockSchema =
       },
 
       /*
+        Question text for mcq blocks
+      */
+      question: {
+        type: String,
+        trim: true
+      },
+
+      /*
         Programming language
         for code blocks.
 

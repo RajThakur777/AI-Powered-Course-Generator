@@ -72,7 +72,8 @@ const verifyModuleOwnership =
 const verifyLessonOwnership =
   async (
     lessonId,
-    userId
+    userId,
+    mustBeCreator = true
   ) => {
     if (
       !mongoose.Types.ObjectId.isValid(
@@ -110,15 +111,24 @@ const verifyLessonOwnership =
     }
 
     const course =
-      await Course.findOne({
-        _id: module.course,
-        creator: userId
-      });
+      await Course.findById(
+        module.course
+      );
 
     if (!course) {
       throw new AppError(
-        "Lesson not found.",
+        "Course not found.",
         404
+      );
+    }
+
+    if (
+      mustBeCreator &&
+      course.creator?.toString() !== userId?.toString()
+    ) {
+      throw new AppError(
+        "You do not have permission to modify this lesson.",
+        403
       );
     }
 
@@ -243,7 +253,8 @@ export const getLessonById =
       } =
         await verifyLessonOwnership(
           lessonId,
-          req.user._id
+          req.user._id,
+          false
         );
 
       res.status(200).json({
@@ -292,13 +303,26 @@ export const updateLesson =
           undefined
         ) {
           if (field === "content" && Array.isArray(req.body.content)) {
-            updates.content = req.body.content.filter(block => {
-              if (block.type === "mcq") {
-                if (!block.options || !Array.isArray(block.options) || block.options.length < 2) return false;
-                if (block.answer === undefined || block.answer === null) return false;
-              }
-              return true;
-            });
+            updates.content = req.body.content
+              .filter(block => {
+                if (block.type === "mcq") {
+                  if (!block.options || !Array.isArray(block.options) || block.options.length < 2) return false;
+                  if (block.answer === undefined || block.answer === null) return false;
+                }
+                return true;
+              })
+              .map(block => {
+                if (block.type === "mcq") {
+                  const questionText = block.question || block.text || "Knowledge Check Question";
+                  return {
+                    ...block,
+                    text: questionText,
+                    question: questionText,
+                    answer: typeof block.answer === "string" ? parseInt(block.answer, 10) : block.answer
+                  };
+                }
+                return block;
+              });
           } else {
             updates[field] = req.body[field];
           }

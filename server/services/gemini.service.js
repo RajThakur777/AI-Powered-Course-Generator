@@ -137,7 +137,9 @@ export const generateStructuredContent = async ({
                 responseMimeType:
                   "application/json",
 
-                responseSchema
+                responseSchema,
+
+                maxOutputTokens: 8192
               }
             });
 
@@ -157,75 +159,53 @@ export const generateStructuredContent = async ({
           }
 
 
+          // Strip markdown code fences if model returned ```json ... ```
+          let cleanedText = text.trim();
+          if (cleanedText.startsWith("```json")) {
+            cleanedText = cleanedText.slice(7);
+          } else if (cleanedText.startsWith("```")) {
+            cleanedText = cleanedText.slice(3);
+          }
+          if (cleanedText.endsWith("```")) {
+            cleanedText = cleanedText.slice(0, -3);
+          }
+          cleanedText = cleanedText.trim();
+
           /*
             Parse JSON
           */
-
           try {
-
-            return JSON.parse(
-              text.trim()
-            );
-
+            return JSON.parse(cleanedText);
           } catch (parseError) {
-
             console.error(
-              "Gemini JSON parsing failed:",
+              `Gemini JSON parsing failed for ${currentModel} on attempt ${attempt}:`,
               parseError.message
             );
-
-            throw new AppError(
-              "Gemini returned invalid JSON.",
-              502
-            );
+            // Don't throw AppError immediately so it can retry or try next model
+            throw new Error(`Invalid JSON: ${parseError.message}`);
           }
 
         } catch (error) {
-
           lastError = error;
-
 
           console.error(
             `Gemini attempt ${attempt} failed for ${currentModel}:`,
             error?.message || error
           );
 
-
           /*
-            Don't retry application errors
+            If this was the last attempt for this model, break out to try the next model
           */
-
-          if (error instanceof AppError) {
-            throw error;
+          if (attempt >= 2) {
+            break;
           }
 
-
           /*
-            Retry only temporary Gemini errors
+            Exponential backoff before retry on same model
           */
-
-          if (!isRetryableError(error)) {
-            throw error;
-          }
-
-
-          /*
-            Exponential backoff
-          */
-
-          if (attempt < 2) {
-
-            const delay =
-              attempt === 1
-                ? 1500
-                : 3000;
-
-            console.log(
-              `Retrying ${currentModel} in ${delay}ms...`
-            );
-
-            await sleep(delay);
-          }
+          const delay = attempt === 1 ? 1500 : 3000;
+          console.log(`Retrying ${currentModel} in ${delay}ms...`);
+          await sleep(delay);
         }
       }
 
