@@ -21,6 +21,9 @@ export default function DashboardLayout() {
             <Route path="/library" element={<Library />} />
             <Route path="/courses/:courseId" element={<Course />} />
             <Route path="/courses/:courseId/module/:moduleIndex/lesson/:lessonIndex" element={<Lesson />} />
+            <Route path="/course/:courseId" element={<Course />} />
+            <Route path="/:courseId" element={<Course />} />
+            <Route path="/:courseId/module/:moduleIndex/lesson/:lessonIndex" element={<Lesson />} />
           </Routes>
         </ErrorBoundary>
       </Box>

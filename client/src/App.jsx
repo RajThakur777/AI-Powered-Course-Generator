@@ -10,6 +10,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard/*" element={<DashboardLayout />} />
+        {/* Support Milestone 7 direct route aliases */}
+        <Route path="/courses/*" element={<DashboardLayout />} />
+        <Route path="/course/:courseId" element={<DashboardLayout />} />
       </Routes>
     </ErrorBoundary>
   );

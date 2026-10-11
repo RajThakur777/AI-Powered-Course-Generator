@@ -24,4 +24,15 @@ router.get(
   searchVideos
 );
 
+/*
+  GET /api/youtube?query=...
+  Support Milestone 9 direct route specification.
+*/
+router.get(
+  "/",
+  requireAuth,
+  syncUser,
+  searchVideos
+);
+
 export default router;
