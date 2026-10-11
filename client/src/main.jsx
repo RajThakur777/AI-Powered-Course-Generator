@@ -8,6 +8,10 @@ import './index.css';
 
 const theme = extendTheme({
   config: { initialColorMode: 'dark', useSystemColorMode: false },
+  fonts: {
+    heading: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+  },
   colors: { 
     brand: { 
       50: '#f5e8ff',

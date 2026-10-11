@@ -50,7 +50,9 @@ if (env.nodeEnv === "production") {
 */
 
 app.use(
-  helmet()
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  })
 );
 
 

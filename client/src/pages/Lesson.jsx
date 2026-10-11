@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Heading, Spinner, Button, HStack, Text } from '@chakra-ui/react';
+import { Box, Heading, Spinner, Button, HStack, Text, Badge, Wrap, WrapItem, Link as ChakraLink, Icon, VStack } from '@chakra-ui/react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { ArrowLeft, Download, Languages, PlayCircle } from 'lucide-react';
+import { ArrowLeft, Download, Languages, PlayCircle, Target, BookOpen, ExternalLink, Tag } from 'lucide-react';
 import LessonRenderer from '../components/LessonRenderer';
 import api, { API_BASE_URL } from '../utils/api';
 import html2canvas from 'html2canvas';
@@ -174,7 +174,18 @@ export default function Lesson() {
            <Text mb={4} color="brand.300" fontWeight="bold" display="flex" alignItems="center" gap={2}>
              <PlayCircle size={20} /> Listen to this lesson (Hinglish)
            </Text>
-           <Box as="audio" controls src={audioUrl} w="100%" sx={{ '&::-webkit-media-controls-panel': { backgroundColor: '#cbd5e0' } }} />
+           <Box 
+             as="audio" 
+             key={audioUrl}
+             controls 
+             preload="auto"
+             w="100%" 
+             sx={{ '&::-webkit-media-controls-panel': { backgroundColor: '#cbd5e0' } }}
+             onError={(e) => console.error("Audio playback error:", e)}
+           >
+             <source src={audioUrl} type="audio/wav" />
+             Your browser does not support the audio element.
+           </Box>
         </Box>
       )}
 
@@ -182,8 +193,38 @@ export default function Lesson() {
         <Box position="absolute" top="-10%" right="-10%" w="30%" h="50%" bgGradient="radial(brand.500, transparent, transparent)" opacity={0.1} filter="blur(60px)" pointerEvents="none" />
         
         <Box position="relative" zIndex={1}>
-          <Heading size="2xl" mb={10} bgGradient="linear(to-r, brand.300, pink.300)" bgClip="text" fontWeight="extrabold" lineHeight="tall">{lesson.title}</Heading>
+          <Heading size="2xl" mb={6} bgGradient="linear(to-r, brand.300, pink.300)" bgClip="text" fontWeight="extrabold" lineHeight="tall">{lesson.title}</Heading>
           
+          {lesson.objectives && lesson.objectives.length > 0 && (
+            <Box mb={8} p={6} bg="whiteAlpha.50" borderRadius="xl" border="1px solid" borderColor="whiteAlpha.200">
+              <HStack spacing={3} mb={3}>
+                <Icon as={Target} color="brand.300" w={5} h={5} />
+                <Heading size="md" color="white">Learning Objectives</Heading>
+              </HStack>
+              <VStack align="stretch" spacing={2} pl={2}>
+                {lesson.objectives.map((obj, oIdx) => (
+                  <Text key={oIdx} color="gray.300" fontSize="md">✓ {obj}</Text>
+                ))}
+              </VStack>
+            </Box>
+          )}
+
+          {lesson.keyTopics && lesson.keyTopics.length > 0 && (
+            <Box mb={8}>
+              <HStack spacing={2} mb={3}>
+                <Icon as={Tag} color="pink.400" w={4} h={4} />
+                <Text fontWeight="semibold" fontSize="sm" color="gray.400" textTransform="uppercase" letterSpacing="wider">Key Topics</Text>
+              </HStack>
+              <Wrap spacing={2}>
+                {lesson.keyTopics.map((topic, tIdx) => (
+                  <WrapItem key={tIdx}>
+                    <Badge colorScheme="purple" px={3} py={1} borderRadius="full" fontSize="sm">{topic}</Badge>
+                  </WrapItem>
+                ))}
+              </Wrap>
+            </Box>
+          )}
+
           {lesson.hinglishText && (
             <Box mb={10} p={6} bg="brand.900" borderLeft="4px solid" borderColor="brand.400" borderRadius="md" boxShadow="md">
               <Text color="gray.200" fontSize="lg" lineHeight="relaxed" whiteSpace="pre-wrap">{lesson.hinglishText}</Text>
@@ -191,6 +232,43 @@ export default function Lesson() {
           )}
 
           <LessonRenderer content={lesson.content} courseId={courseId} lessonId={lesson._id} />
+
+          {((lesson.readings && lesson.readings.length > 0) || (lesson.externalLinks && lesson.externalLinks.length > 0)) && (
+            <Box mt={12} pt={8} borderTop="1px solid" borderColor="whiteAlpha.200">
+              <HStack spacing={3} mb={6}>
+                <Icon as={BookOpen} color="brand.300" w={6} h={6} />
+                <Heading size="lg" color="white">Suggested Readings & Resources</Heading>
+              </HStack>
+              <VStack align="stretch" spacing={4}>
+                {lesson.readings?.map((reading, rIdx) => (
+                  <Box key={rIdx} p={4} bg="whiteAlpha.50" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.100">
+                    <HStack justify="space-between" mb={1}>
+                      <Text fontWeight="bold" color="brand.200">{reading.title}</Text>
+                      {reading.url && (
+                        <ChakraLink href={reading.url} isExternal color="pink.300" fontSize="sm" display="flex" alignItems="center" gap={1}>
+                          Visit <ExternalLink size={14} />
+                        </ChakraLink>
+                      )}
+                    </HStack>
+                    {reading.author && <Text fontSize="xs" color="gray.400" mb={1}>Author: {reading.author}</Text>}
+                    <Text fontSize="sm" color="gray.300">{reading.description}</Text>
+                  </Box>
+                ))}
+                {lesson.externalLinks?.map((link, lIdx) => (
+                  <Box key={lIdx} p={4} bg="whiteAlpha.50" borderRadius="lg" border="1px solid" borderColor="whiteAlpha.100">
+                    <HStack justify="space-between" mb={1}>
+                      <Text fontWeight="bold" color="brand.200">{link.title}</Text>
+                      {link.url && (
+                        <ChakraLink href={link.url} isExternal color="pink.300" fontSize="sm" display="flex" alignItems="center" gap={1}>
+                          {link.source || "Resource"} <ExternalLink size={14} />
+                        </ChakraLink>
+                      )}
+                    </HStack>
+                  </Box>
+                ))}
+              </VStack>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

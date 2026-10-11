@@ -178,28 +178,46 @@ export const generateLessonAudioFile =
       /*
         Generate audio using Gemini TTS.
       */
-      const response =
-        await ai.models.generateContent({
-          model: env.geminiFallbackModel || "gemini-2.0-flash",
+      const ttsModel = env.geminiTtsModel || "gemini-3.8-flash-tts";
+      let response;
 
-          contents:
-            trimmedText,
-
+      try {
+        response = await ai.models.generateContent({
+          model: ttsModel,
+          contents: trimmedText,
           config: {
             responseModalities: [
               "AUDIO"
             ],
-
             speechConfig: {
               voiceConfig: {
                 prebuiltVoiceConfig: {
-                  voiceName:
-                    "Kore"
+                  voiceName: "Kore"
                 }
               }
             }
           }
         });
+      } catch (primaryErr) {
+        console.warn(`Primary TTS model (${ttsModel}) failed:`, primaryErr?.message || primaryErr);
+        // Fallback to gemini-3.1-flash-tts-preview if primary fails
+        const fallbackModel = "gemini-3.1-flash-tts-preview";
+        console.log(`Retrying TTS with fallback model (${fallbackModel})...`);
+        response = await ai.models.generateContent({
+          model: fallbackModel,
+          contents: trimmedText,
+          config: {
+            responseModalities: [
+              "AUDIO"
+            ],
+            speechConfig: {
+              voiceConfig: {
+                voiceName: "Kore"
+              }
+            }
+          }
+        });
+      }
 
 
       /*

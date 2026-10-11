@@ -218,6 +218,22 @@ export default function LessonRenderer({ content, courseId, lessonId }) {
                 <Code bg="transparent" color="brand.200" whiteSpace="pre">{block.text}</Code>
               </Box>
             );
+          case 'list':
+            return (
+              <VStack key={idx} align="stretch" spacing={2} pl={4}>
+                {(block.items || block.text?.split('\n') || []).map((item, iIdx) => (
+                  <Text key={iIdx} fontSize="lg" color="gray.300">
+                    • {typeof item === 'string' ? item : item.text || JSON.stringify(item)}
+                  </Text>
+                ))}
+              </VStack>
+            );
+          case 'callout':
+            return (
+              <Box key={idx} p={5} bg="brand.900" borderLeft="4px solid" borderColor="brand.400" borderRadius="md" my={4}>
+                <Text color="gray.200" fontSize="lg" fontStyle="italic">{block.text}</Text>
+              </Box>
+            );
           case 'video':
             return <VideoBlock key={idx} query={block.query || block.url} />;
           case 'mcq':

@@ -40,6 +40,9 @@ export const env = {
   geminiFallbackModel:
     process.env.GEMINI_FALLBACK_MODEL || "gemini-3.5-flash",
 
+  geminiTtsModel:
+    process.env.GEMINI_TTS_MODEL || "gemini-3.8-flash-tts",
+
   // YouTube
   youtubeApiKey: process.env.YOUTUBE_API_KEY
 };
