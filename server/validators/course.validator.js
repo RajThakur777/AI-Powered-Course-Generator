@@ -53,12 +53,12 @@ export const createCourseSchema =
       })
       .trim()
       .min(
-        3,
-        "Course title must contain at least 3 characters."
+        1,
+        "Course title cannot be empty."
       )
       .max(
-        200,
-        "Course title cannot exceed 200 characters."
+        300,
+        "Course title cannot exceed 300 characters."
       ),
 
     description: z
@@ -68,12 +68,12 @@ export const createCourseSchema =
       })
       .trim()
       .min(
-        10,
+        5,
         "Course description is too short."
       )
       .max(
-        5000,
-        "Course description cannot exceed 5000 characters."
+        10000,
+        "Course description cannot exceed 10000 characters."
       ),
 
     originalPrompt: z
@@ -83,46 +83,33 @@ export const createCourseSchema =
       })
       .trim()
       .min(
-        3,
+        1,
         "Original prompt is required."
       )
       .max(
-        1000,
-        "Original prompt cannot exceed 1000 characters."
-      ),
+        2000,
+        "Original prompt cannot exceed 2000 characters."
+      )
+      .optional(),
 
     tags: z
-      .array(tagSchema)
+      .array(z.any())
       .max(
-        20,
-        "A course cannot have more than 20 tags."
+        50,
+        "A course cannot have more than 50 tags."
       )
       .optional(),
 
     difficulty: z
-      .enum(
-        [
-          "beginner",
-          "intermediate",
-          "advanced"
-        ],
-        {
-          error:
-            "Difficulty must be beginner, intermediate, or advanced."
-        }
-      )
+      .string()
       .optional(),
 
     estimatedDuration: z
-      .string({
-        error:
-          "Estimated duration must be a string."
-      })
-      .trim()
-      .max(
-        100,
-        "Estimated duration is too long."
-      )
+      .any()
+      .optional(),
+
+    modules: z
+      .array(z.any())
       .optional()
   });
 

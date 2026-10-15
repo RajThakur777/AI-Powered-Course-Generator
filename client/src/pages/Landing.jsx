@@ -58,8 +58,12 @@ export default function Landing() {
   ];
 
   const handleCtaClick = (prompt) => {
+    const targetTopic = (typeof prompt === 'string' && prompt.trim()) ? prompt.trim() : demoPrompt.trim();
+    if (targetTopic) {
+      localStorage.setItem('pendingCourseTopic', targetTopic);
+    }
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/dashboard', { state: { topic: targetTopic } });
     } else {
       loginWithRedirect();
     }

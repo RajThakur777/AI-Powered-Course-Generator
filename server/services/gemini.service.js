@@ -97,7 +97,10 @@ export const generateStructuredContent = async ({
 
     const models = [
       model,
-      env.geminiFallbackModel
+      env.geminiFallbackModel,
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash"
     ].filter(
       (value, index, array) =>
         value &&
@@ -311,7 +314,10 @@ export const generateText = async ({
 
     const models = [
       model,
-      env.geminiFallbackModel
+      env.geminiFallbackModel,
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-1.5-flash"
     ].filter(
       (value, index, array) =>
         value &&

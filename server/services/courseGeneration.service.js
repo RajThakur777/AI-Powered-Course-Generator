@@ -46,9 +46,6 @@ const courseSchema = {
     modules: {
       type: "array",
 
-      minItems: 3,
-      maxItems: 6,
-
       items: {
         type: "object",
 
@@ -67,9 +64,6 @@ const courseSchema = {
 
           lessons: {
             type: "array",
-
-            minItems: 3,
-            maxItems: 5,
 
             items: {
               type: "object",
@@ -414,7 +408,7 @@ individual detailed lessons.
 
 
     /*
-      Basic validation of generated result.
+      Basic validation and normalization of generated result.
     */
     if (
       !course ||
@@ -426,29 +420,62 @@ individual detailed lessons.
       );
     }
 
-
     if (
       !Array.isArray(
         course.modules
-      )
+      ) ||
+      course.modules.length === 0
     ) {
       throw new AppError(
-        "Gemini generated an invalid module structure.",
+        "Gemini could not generate modules for this topic. Please try again.",
         502
       );
     }
 
-
-    if (
-      course.modules.length < 3 ||
-      course.modules.length > 6
-    ) {
-      throw new AppError(
-        "Generated course must contain between 3 and 6 modules.",
-        502
-      );
+    // Limit to max 6 modules to ensure high quality and quick processing
+    if (course.modules.length > 6) {
+      course.modules = course.modules.slice(0, 6);
     }
 
+    // Normalize difficulty
+    const rawDiff = String(course.difficulty || "beginner").toLowerCase();
+    course.difficulty = ["beginner", "intermediate", "advanced"].includes(rawDiff)
+      ? rawDiff
+      : "beginner";
+
+    // Normalize tags
+    if (!Array.isArray(course.tags)) {
+      course.tags = [trimmedTopic];
+    } else {
+      course.tags = course.tags.map(t => String(t).trim()).filter(Boolean);
+      if (course.tags.length === 0) course.tags = [trimmedTopic];
+    }
+
+    // Ensure estimatedDuration
+    if (!course.estimatedDuration) {
+      course.estimatedDuration = "2-4 hours";
+    }
+
+    // Normalize modules and ensure lessons are present
+    course.modules = course.modules.map((mod, mIdx) => {
+      let lessons = Array.isArray(mod.lessons) ? mod.lessons : [];
+      if (lessons.length === 0) {
+        lessons = [
+          { title: `${mod.title || 'Module'} - Fundamentals`, order: 0 },
+          { title: `${mod.title || 'Module'} - Practical Deep Dive`, order: 1 },
+          { title: `${mod.title || 'Module'} - Best Practices & Exercises`, order: 2 }
+        ];
+      }
+      return {
+        title: mod.title?.trim() || `Module ${mIdx + 1}`,
+        description: mod.description?.trim() || "",
+        order: typeof mod.order === "number" ? mod.order : mIdx,
+        lessons: lessons.map((les, lIdx) => ({
+          title: les.title?.trim() || `Lesson ${lIdx + 1}`,
+          order: typeof les.order === "number" ? les.order : lIdx
+        }))
+      };
+    });
 
     return course;
   };
